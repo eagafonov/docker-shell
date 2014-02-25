@@ -1,0 +1,50 @@
+#!/usr/bin/make -f
+
+ID:=$(shell id -u)
+
+ROOT:=$(shell pwd)
+
+DOCKER:=$(ROOT)/bin/docker
+
+all: help
+
+help:
+	@echo start - start docker daemon
+	@echo stop  - stop docker daemon
+	@echo shell - spaun shell with docker enabled
+
+start: do_check_root
+	start-stop-daemon --start --background --exec $(DOCKER) -- -d
+
+stop: do_check_root
+	start-stop-daemon --stop --exec $(DOCKER)
+
+status: do_check_root
+	@if start-stop-daemon --status --exec $(DOCKER); then \
+		echo "Daemon started"; \
+	else \
+		echo "Daemon not started"; \
+	fi
+	
+
+shell: do_check_root
+	debian_chroot=DOCKER-SHELL PATH=$$PATH:$(ROOT)/bin /bin/bash
+
+$(ROOT)/bin/docker: $(ROOT)/bin
+	wget https://get.docker.io/builds/Linux/x86_64/docker-latest -O $@
+	chmod +x $@
+	touch $@
+
+$(ROOT)/bin:
+	mkdir -p $(ROOT)/bin
+
+ifeq (${ID}, 0)
+do_check_root:
+	@#echo "Lauched as root - OK"
+else
+do_check_root:
+	@echo "Must be launched as root"
+	exit 1
+endif
+
+
