@@ -9,9 +9,11 @@ DOCKER:=$(ROOT)/bin/docker
 all: help
 
 help:
-	@echo start - start docker daemon
-	@echo stop  - stop docker daemon
-	@echo shell - spaun shell with docker enabled
+	@echo
+	@echo "\tstart - start docker daemon"
+	@echo "\tstop  - stop docker daemon"
+	@echo "\tstatus  - show docker daemon status"
+	@echo "\tshell - spaun shell with docker enabled"
 
 start: do_check_root
 	start-stop-daemon --start --background --exec $(DOCKER) -- -d
@@ -47,4 +49,5 @@ do_check_root:
 	exit 1
 endif
 
-
+run-dockerui:
+	docker run --name dockerui -d -p 9000:9000 -v /var/run/docker.sock:/docker.sock dockerui -e /docker.sock
